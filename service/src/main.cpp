@@ -74,22 +74,25 @@ int main(int argc, char* argv[]) {
   po::variables_map vm = parse_opts(argc, argv);
   debug = vm["debug"].as<bool>();
   gpu = vm["gpu"].as<bool>();
-  Caffe::set_phase(Caffe::TEST);
   if (vm["gpu"].as<bool>())
-    Caffe::set_mode(Caffe::GPU);
+      Caffe::set_mode(Caffe::GPU);
   else
-    Caffe::set_mode(Caffe::CPU);
+      Caffe::set_mode(Caffe::CPU);
+
+
 
   // load all models at init
   ifstream file(vm["nets"].as<string>().c_str());
   string net_name;
   while (file >> net_name) {
     string net = vm["common"].as<string>() + "configs/" + net_name;
-    Net<float>* temp = new Net<float>(net);
+    Net<float>* temp = new Net<float>(net, TEST);
     const std::string name = temp->name();
     nets[name] = temp;
     std::string weights = vm["common"].as<string>() +
                           vm["weights"].as<string>() + name + ".caffemodel";
+  
+  //  nets[name]->reset(temp); 
     nets[name]->CopyTrainedLayersFrom(weights);
   }
 
